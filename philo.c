@@ -6,7 +6,7 @@
 /*   By: btvildia <btvildia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:07:16 by btvildia          #+#    #+#             */
-/*   Updated: 2024/04/06 15:01:17 by btvildia         ###   ########.fr       */
+/*   Updated: 2024/04/06 22:30:29 by btvildia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,18 @@ void	ft_init_data_philo(t_data *data)
 	i = 0;
 	while (i < data->nb_philo)
 	{
-		data->philo[i].id = i + 1;
-		data->philo[i].l_fork = i;
-		data->philo[i].r_fork = (i + 1) % data->nb_philo;
+		pthread_mutex_init(&data->forks[i], NULL);
+		i++;
+	}
+	i = 0;
+	while (i < data->nb_philo)
+	{
+		data->philo->fork = data->forks[i];
+		data->philo[i].id = i;
+		if (data->nb_philo == i + 1)
+			data->philo[i].id_next = 0;
+		else
+			data->philo[i].id_next = i + 1;
 		data->philo[i].food = 0;
 		data->philo[i].data = data;
 		i++;
@@ -57,16 +66,21 @@ void	*ft_philo(void *arg)
 	while (1)
 	{
 		ft_print(philo, "is thinking");
+		pthread_mutex_lock(&philo->data->forks[(philo->id)]);
+		pthread_mutex_lock(&philo->data->forks[(philo->id_next)]);
+		ft_print(philo, "has taken a fork");
 		ft_usleep(philo->data->time_eat);
 		ft_print(philo, "is eating");
 		philo->last_meal = get_time(philo->data->time);
+		pthread_mutex_unlock(&philo->data->forks[(philo->id)]);
+		pthread_mutex_unlock(&philo->data->forks[(philo->id_next)]);
 		ft_usleep(philo->data->time_eat);
 		ft_print(philo, "is sleeping");
 		ft_usleep(philo->data->time_sleep);
 		if (philo->data->nb_food && ++philo->food == philo->data->nb_food)
 			break ;
-		if (get_time(philo->data->time)
-			- philo->last_meal > philo->data->time_die)
+		if (philo->data->time_die < get_time(philo->data->time)
+			- philo->last_meal)
 		{
 			ft_print(philo, "died");
 			break ;
@@ -93,6 +107,11 @@ int	main(int ac, char **av)
 	while (i < data.nb_philo)
 	{
 		pthread_join(data.philo[i].thread, NULL);
+		i++;
+	}
+	while (i < data.nb_philo)
+	{
+		pthread_mutex_destroy(&data.forks[i]);
 		i++;
 	}
 	return (0);

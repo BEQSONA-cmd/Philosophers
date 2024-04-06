@@ -6,7 +6,7 @@
 /*   By: btvildia <btvildia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:10:54 by btvildia          #+#    #+#             */
-/*   Updated: 2024/04/06 15:01:03 by btvildia         ###   ########.fr       */
+/*   Updated: 2024/04/06 22:08:12 by btvildia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ long	get_time(struct timeval time)
 void	ft_print(t_philo *philo, char *str)
 {
 	pthread_mutex_lock(&philo->data->print);
-	printf("%ld %d %s\n", get_time(philo->data->time), philo->id, str);
+	printf("%ld %d %s\n", get_time(philo->data->time), philo->id + 1, str);
 	pthread_mutex_unlock(&philo->data->print);
 }
 

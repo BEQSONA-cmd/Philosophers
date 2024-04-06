@@ -6,7 +6,7 @@
 /*   By: btvildia <btvildia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:07:23 by btvildia          #+#    #+#             */
-/*   Updated: 2024/04/06 15:00:22 by btvildia         ###   ########.fr       */
+/*   Updated: 2024/04/06 22:30:29 by btvildia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,8 @@
 typedef struct s_philo
 {
 	int				id;
-	int				l_fork;
-	int				r_fork;
+	int				id_next;
+	pthread_mutex_t	fork;
 	int				food;
 	struct s_data	*data;
 	pthread_t		thread;
@@ -37,7 +37,7 @@ typedef struct s_data
 	int				time_eat;
 	int				time_sleep;
 	int				nb_food;
-	int				*forks;
+	pthread_mutex_t	*forks;
 	t_philo			*philo;
 	pthread_mutex_t	print;
 	struct timeval	time;
