@@ -6,7 +6,7 @@
 /*   By: btvildia <btvildia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:07:16 by btvildia          #+#    #+#             */
-/*   Updated: 2024/04/06 22:30:29 by btvildia         ###   ########.fr       */
+/*   Updated: 2024/04/09 22:54:37 by btvildia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ t_data	ft_init(int ac, char **av)
 	data.time_sleep = ft_atoi(av[4]);
 	if (ac == 6)
 		data.nb_food = ft_atoi(av[5]);
-	if (data.nb_philo < 2 || data.nb_philo > 200 || (ac == 6
+	if (data.nb_philo < 1 || data.nb_philo > 200 || (ac == 6
 			&& data.nb_food < 1))
 		ft_error("Invalid arguments");
 	data.forks = ft_malloc(sizeof(int) * data.nb_philo);
@@ -60,31 +60,39 @@ t_data	ft_init(int ac, char **av)
 
 void	*ft_philo(void *arg)
 {
-	t_philo	*philo;
+	t_philo			*philo;
+	pthread_mutex_t	*forks;
+	int				i;
 
 	philo = (t_philo *)arg;
+	forks = philo->data->forks;
+	i = philo->data->nb_philo % 2;
 	while (1)
 	{
+		if (i == 0)
+			ft_usleep(philo->data->time_die - philo->data->time_sleep
+				- philo->data->time_eat - 1);
 		ft_print(philo, "is thinking");
-		pthread_mutex_lock(&philo->data->forks[(philo->id)]);
-		pthread_mutex_lock(&philo->data->forks[(philo->id_next)]);
+		ft_usleep(philo->data->time_die - philo->data->time_sleep
+			- philo->data->time_eat - 1);
+		// pthread_mutex_lock(&forks[philo->id]);
+		// pthread_mutex_lock(&forks[philo->id_next]);
 		ft_print(philo, "has taken a fork");
-		ft_usleep(philo->data->time_eat);
 		ft_print(philo, "is eating");
 		philo->last_meal = get_time(philo->data->time);
-		pthread_mutex_unlock(&philo->data->forks[(philo->id)]);
-		pthread_mutex_unlock(&philo->data->forks[(philo->id_next)]);
 		ft_usleep(philo->data->time_eat);
+		// pthread_mutex_unlock(&forks[philo->id]);
+		// pthread_mutex_unlock(&forks[philo->id_next]);
 		ft_print(philo, "is sleeping");
 		ft_usleep(philo->data->time_sleep);
-		if (philo->data->nb_food && ++philo->food == philo->data->nb_food)
-			break ;
-		if (philo->data->time_die < get_time(philo->data->time)
+		if (philo->data->time_die <= get_time(philo->data->time)
 			- philo->last_meal)
 		{
 			ft_print(philo, "died");
 			break ;
 		}
+		if (philo->data->nb_food && ++philo->food == philo->data->nb_food)
+			break ;
 	}
 	return (NULL);
 }
@@ -107,11 +115,6 @@ int	main(int ac, char **av)
 	while (i < data.nb_philo)
 	{
 		pthread_join(data.philo[i].thread, NULL);
-		i++;
-	}
-	while (i < data.nb_philo)
-	{
-		pthread_mutex_destroy(&data.forks[i]);
 		i++;
 	}
 	return (0);
