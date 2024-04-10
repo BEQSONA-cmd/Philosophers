@@ -6,7 +6,7 @@
 /*   By: btvildia <btvildia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:07:16 by btvildia          #+#    #+#             */
-/*   Updated: 2024/04/09 22:54:37 by btvildia         ###   ########.fr       */
+/*   Updated: 2024/04/10 22:43:51 by btvildia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,7 @@ void	ft_init_data_philo(t_data *data)
 	i = 0;
 	while (i < data->nb_philo)
 	{
-		pthread_mutex_init(&data->forks[i], NULL);
-		i++;
-	}
-	i = 0;
-	while (i < data->nb_philo)
-	{
-		data->philo->fork = data->forks[i];
+		pthread_mutex_init(&data->philo[i].fork, NULL);
 		data->philo[i].id = i;
 		if (data->nb_philo == i + 1)
 			data->philo[i].id_next = 0;
@@ -50,7 +44,6 @@ t_data	ft_init(int ac, char **av)
 	if (data.nb_philo < 1 || data.nb_philo > 200 || (ac == 6
 			&& data.nb_food < 1))
 		ft_error("Invalid arguments");
-	data.forks = ft_malloc(sizeof(int) * data.nb_philo);
 	data.philo = ft_malloc(sizeof(t_philo) * data.nb_philo);
 	pthread_mutex_init(&data.print, NULL);
 	gettimeofday(&data.time, NULL);
@@ -60,12 +53,10 @@ t_data	ft_init(int ac, char **av)
 
 void	*ft_philo(void *arg)
 {
-	t_philo			*philo;
-	pthread_mutex_t	*forks;
-	int				i;
+	t_philo	*philo;
+	int		i;
 
 	philo = (t_philo *)arg;
-	forks = philo->data->forks;
 	i = philo->data->nb_philo % 2;
 	while (1)
 	{
@@ -73,16 +64,16 @@ void	*ft_philo(void *arg)
 			ft_usleep(philo->data->time_die - philo->data->time_sleep
 				- philo->data->time_eat - 1);
 		ft_print(philo, "is thinking");
+		pthread_mutex_lock(&philo->fork);
+		ft_print(philo, "has taken a fork");
+		pthread_mutex_lock(&philo->data->philo[philo->id_next].fork);
 		ft_usleep(philo->data->time_die - philo->data->time_sleep
 			- philo->data->time_eat - 1);
-		// pthread_mutex_lock(&forks[philo->id]);
-		// pthread_mutex_lock(&forks[philo->id_next]);
-		ft_print(philo, "has taken a fork");
 		ft_print(philo, "is eating");
 		philo->last_meal = get_time(philo->data->time);
 		ft_usleep(philo->data->time_eat);
-		// pthread_mutex_unlock(&forks[philo->id]);
-		// pthread_mutex_unlock(&forks[philo->id_next]);
+		pthread_mutex_unlock(&philo->fork);
+		pthread_mutex_unlock(&philo->data->philo[philo->id_next].fork);
 		ft_print(philo, "is sleeping");
 		ft_usleep(philo->data->time_sleep);
 		if (philo->data->time_die <= get_time(philo->data->time)

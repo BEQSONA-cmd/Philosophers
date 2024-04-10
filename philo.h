@@ -6,7 +6,7 @@
 /*   By: btvildia <btvildia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:07:23 by btvildia          #+#    #+#             */
-/*   Updated: 2024/04/09 18:02:43 by btvildia         ###   ########.fr       */
+/*   Updated: 2024/04/10 22:37:13 by btvildia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,6 @@ typedef struct s_data
 	int				time_eat;
 	int				time_sleep;
 	int				nb_food;
-	pthread_mutex_t	*forks;
 	t_philo			*philo;
 	pthread_mutex_t	print;
 	struct timeval	time;
