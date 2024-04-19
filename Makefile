@@ -7,7 +7,7 @@ OBJ = $(SRC:.c=.o)
 
 CC = cc
 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 
 all: $(NAME)
 
@@ -23,4 +23,5 @@ fclean: clean
 re: fclean $(NAME)
 
 .PHONY:	all clean fclean re bonus
-# -fsanitize=thread -g
+
+# valgrind --leak-check=full

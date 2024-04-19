@@ -6,7 +6,7 @@
 /*   By: btvildia <btvildia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:10:54 by btvildia          #+#    #+#             */
-/*   Updated: 2024/04/06 22:08:12 by btvildia         ###   ########.fr       */
+/*   Updated: 2024/04/19 19:56:28 by btvildia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,11 +41,27 @@ long	get_time(struct timeval time)
 	return (diff);
 }
 
-void	ft_print(t_philo *philo, char *str)
+int	ft_strcmp(char *s1, char *s2)
+{
+	int	i;
+
+	i = 0;
+	while (s1[i] && s2[i] && s1[i] == s2[i])
+		i++;
+	return (s1[i] - s2[i]);
+}
+
+int	ft_print(t_philo *philo, char *str)
 {
 	pthread_mutex_lock(&philo->data->print);
+	if (ft_strcmp(str, "died") == 0)
+	{
+		printf("%ld %d %s\n", get_time(philo->data->time), philo->id + 1, str);
+		return (1);
+	}
 	printf("%ld %d %s\n", get_time(philo->data->time), philo->id + 1, str);
 	pthread_mutex_unlock(&philo->data->print);
+	return (0);
 }
 
 void	ft_error(char *str)

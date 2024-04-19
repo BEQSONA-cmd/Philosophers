@@ -6,7 +6,7 @@
 /*   By: btvildia <btvildia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:07:16 by btvildia          #+#    #+#             */
-/*   Updated: 2024/04/10 22:43:51 by btvildia         ###   ########.fr       */
+/*   Updated: 2024/04/19 19:56:35 by btvildia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ void	ft_init_data_philo(t_data *data)
 	{
 		pthread_mutex_init(&data->philo[i].fork, NULL);
 		data->philo[i].id = i;
+		data->philo[i].last_meal = get_time(data->time);
 		if (data->nb_philo == i + 1)
 			data->philo[i].id_next = 0;
 		else
@@ -39,6 +40,7 @@ t_data	ft_init(int ac, char **av)
 	data.time_die = ft_atoi(av[2]);
 	data.time_eat = ft_atoi(av[3]);
 	data.time_sleep = ft_atoi(av[4]);
+	data.nb_food = 0;
 	if (ac == 6)
 		data.nb_food = ft_atoi(av[5]);
 	if (data.nb_philo < 1 || data.nb_philo > 200 || (ac == 6
@@ -51,24 +53,17 @@ t_data	ft_init(int ac, char **av)
 	return (data);
 }
 
-void	*ft_philo(void *arg)
+void	simulation(t_philo *philo)
 {
-	t_philo	*philo;
-	int		i;
-
-	philo = (t_philo *)arg;
-	i = philo->data->nb_philo % 2;
 	while (1)
 	{
-		if (i == 0)
-			ft_usleep(philo->data->time_die - philo->data->time_sleep
-				- philo->data->time_eat - 1);
-		ft_print(philo, "is thinking");
 		pthread_mutex_lock(&philo->fork);
-		ft_print(philo, "has taken a fork");
 		pthread_mutex_lock(&philo->data->philo[philo->id_next].fork);
-		ft_usleep(philo->data->time_die - philo->data->time_sleep
-			- philo->data->time_eat - 1);
+		if (philo->data->time_die <= get_time(philo->data->time)
+			- philo->last_meal)
+			if (ft_print(philo, "died") == 1)
+				break ;
+		ft_print(philo, "has taken a fork");
 		ft_print(philo, "is eating");
 		philo->last_meal = get_time(philo->data->time);
 		ft_usleep(philo->data->time_eat);
@@ -76,15 +71,23 @@ void	*ft_philo(void *arg)
 		pthread_mutex_unlock(&philo->data->philo[philo->id_next].fork);
 		ft_print(philo, "is sleeping");
 		ft_usleep(philo->data->time_sleep);
-		if (philo->data->time_die <= get_time(philo->data->time)
-			- philo->last_meal)
-		{
-			ft_print(philo, "died");
-			break ;
-		}
+		ft_print(philo, "is thinking");
 		if (philo->data->nb_food && ++philo->food == philo->data->nb_food)
 			break ;
 	}
+}
+
+void	*ft_philo(void *arg)
+{
+	t_philo	*philo;
+
+	philo = (t_philo *)arg;
+	if (philo->id % 2 == 0)
+	{
+		ft_usleep(1);
+		ft_print(philo, "is thinking");
+	}
+	simulation(philo);
 	return (NULL);
 }
 
@@ -108,5 +111,9 @@ int	main(int ac, char **av)
 		pthread_join(data.philo[i].thread, NULL);
 		i++;
 	}
+	i = 0;
+	while (i < data.nb_philo)
+		pthread_mutex_destroy(&data.philo[i++].fork);
+	free(data.philo);
 	return (0);
 }
