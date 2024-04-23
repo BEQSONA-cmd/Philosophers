@@ -6,7 +6,7 @@
 /*   By: btvildia <btvildia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:07:23 by btvildia          #+#    #+#             */
-/*   Updated: 2024/04/19 19:55:03 by btvildia         ###   ########.fr       */
+/*   Updated: 2024/04/20 15:21:58 by btvildia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ typedef struct s_data
 void				*ft_philo(void *arg);
 void				ft_usleep(int time);
 long				get_time(struct timeval time);
-int					ft_print(t_philo *philo, char *str);
+void				ft_print(t_philo *philo, char *str);
 void				*ft_malloc(size_t size);
 int					ft_atoi(char *str);
 void				ft_error(char *str);

@@ -6,7 +6,7 @@
 /*   By: btvildia <btvildia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:10:54 by btvildia          #+#    #+#             */
-/*   Updated: 2024/04/19 19:56:28 by btvildia         ###   ########.fr       */
+/*   Updated: 2024/04/20 15:23:30 by btvildia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,17 +51,16 @@ int	ft_strcmp(char *s1, char *s2)
 	return (s1[i] - s2[i]);
 }
 
-int	ft_print(t_philo *philo, char *str)
+void	ft_print(t_philo *philo, char *str)
 {
 	pthread_mutex_lock(&philo->data->print);
 	if (ft_strcmp(str, "died") == 0)
 	{
 		printf("%ld %d %s\n", get_time(philo->data->time), philo->id + 1, str);
-		return (1);
+		return ;
 	}
 	printf("%ld %d %s\n", get_time(philo->data->time), philo->id + 1, str);
 	pthread_mutex_unlock(&philo->data->print);
-	return (0);
 }
 
 void	ft_error(char *str)
@@ -92,8 +91,8 @@ int	ft_atoi(char *str)
 	i = 0;
 	x = 0;
 	s = 1;
-	while ((str[i] == ' ') || (str[i] >= 9 && str[i] <= 13))
-		i++;
+	if ((str[i] == ' ') || (str[i] >= 9 && str[i] <= 13))
+		ft_error("Error");
 	if ((str[i] == '-') || (str[i] == '+'))
 	{
 		if (str[i] == '-')
