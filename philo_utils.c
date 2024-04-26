@@ -6,7 +6,7 @@
 /*   By: btvildia <btvildia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:10:54 by btvildia          #+#    #+#             */
-/*   Updated: 2024/04/20 15:23:30 by btvildia         ###   ########.fr       */
+/*   Updated: 2024/04/26 13:30:16 by btvildia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,9 +54,16 @@ int	ft_strcmp(char *s1, char *s2)
 void	ft_print(t_philo *philo, char *str)
 {
 	pthread_mutex_lock(&philo->data->print);
+	if (philo->data->dead == 1)
+	{
+		pthread_mutex_unlock(&philo->data->print);
+		return ;
+	}
 	if (ft_strcmp(str, "died") == 0)
 	{
+		philo->data->dead = 1;
 		printf("%ld %d %s\n", get_time(philo->data->time), philo->id + 1, str);
+		pthread_mutex_unlock(&philo->data->print);
 		return ;
 	}
 	printf("%ld %d %s\n", get_time(philo->data->time), philo->id + 1, str);
@@ -113,7 +120,7 @@ int	ft_atoi(char *str)
 
 void	*ft_malloc(size_t size)
 {
-	void *ptr;
+	void	*ptr;
 
 	ptr = malloc(size);
 	if (!ptr)

@@ -6,7 +6,7 @@
 /*   By: btvildia <btvildia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:07:23 by btvildia          #+#    #+#             */
-/*   Updated: 2024/04/20 15:21:58 by btvildia         ###   ########.fr       */
+/*   Updated: 2024/04/26 13:47:00 by btvildia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ typedef struct s_philo
 	struct s_data	*data;
 	pthread_t		thread;
 	int				last_meal;
+
 }					t_philo;
 
 typedef struct s_data
@@ -37,6 +38,8 @@ typedef struct s_data
 	int				time_eat;
 	int				time_sleep;
 	int				nb_food;
+	int				dead;
+	pthread_mutex_t	ate;
 	t_philo			*philo;
 	pthread_mutex_t	print;
 	struct timeval	time;
@@ -50,7 +53,6 @@ void				*ft_malloc(size_t size);
 int					ft_atoi(char *str);
 void				ft_error(char *str);
 int					ft_strlen(char *s);
-void				ft_usleep(int time);
-t_data				ft_init(int ac, char **av);
+void				ft_init(int ac, char **av, t_data *data);
 
 #endif

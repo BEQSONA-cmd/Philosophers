@@ -6,7 +6,7 @@
 /*   By: btvildia <btvildia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:07:16 by btvildia          #+#    #+#             */
-/*   Updated: 2024/04/23 23:49:47 by btvildia         ###   ########.fr       */
+/*   Updated: 2024/04/26 13:48:29 by btvildia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,36 +32,50 @@ void	ft_init_data_philo(t_data *data)
 	}
 }
 
-t_data	ft_init(int ac, char **av)
+void	ft_init(int ac, char **av, t_data *data)
 {
-	t_data	data;
-
 	if (ft_strlen(av[1]) == 0 || ft_strlen(av[2]) == 0 || ft_strlen(av[3]) == 0
 		|| ft_strlen(av[4]) == 0)
 		ft_error("Invalid arguments");
-	data.nb_philo = ft_atoi(av[1]);
-	data.time_die = ft_atoi(av[2]);
-	data.time_eat = ft_atoi(av[3]);
-	data.time_sleep = ft_atoi(av[4]);
-	data.nb_food = 0;
+	data->nb_philo = ft_atoi(av[1]);
+	data->time_die = ft_atoi(av[2]);
+	data->time_eat = ft_atoi(av[3]);
+	data->time_sleep = ft_atoi(av[4]);
+	data->nb_food = 0;
 	if (ac == 6)
-		data.nb_food = ft_atoi(av[5]);
-	if (data.nb_philo < 1 || data.nb_philo > 200 || (ac == 6
-			&& data.nb_food < 1))
+		data->nb_food = ft_atoi(av[5]);
+	if (data->nb_philo < 1 || data->nb_philo > 200 || (ac == 6
+			&& data->nb_food < 1))
 		ft_error("Invalid arguments");
-	data.philo = ft_malloc(sizeof(t_philo) * data.nb_philo);
-	pthread_mutex_init(&data.print, NULL);
-	gettimeofday(&data.time, NULL);
-	ft_init_data_philo(&data);
-	return (data);
+	data->philo = ft_malloc(sizeof(t_philo) * data->nb_philo);
+	data->dead = 0;
+	pthread_mutex_init(&data->print, NULL);
+	pthread_mutex_init(&data->ate, NULL);
+	gettimeofday(&data->time, NULL);
+	ft_init_data_philo(data);
 }
 
 void	simulation(t_philo *philo)
 {
 	while (1)
 	{
+		pthread_mutex_lock(&philo->data->print);
+		if (philo->data->dead == 1)
+		{
+			pthread_mutex_unlock(&philo->data->print);
+			break ;
+		}
+		pthread_mutex_unlock(&philo->data->print);
 		pthread_mutex_lock(&philo->fork);
 		pthread_mutex_lock(&philo->data->philo[philo->id_next].fork);
+		if (philo->data->time_die <= get_time(philo->data->time)
+			- philo->last_meal)
+		{
+			ft_print(philo, "died");
+			pthread_mutex_unlock(&philo->fork);
+			pthread_mutex_unlock(&philo->data->philo[philo->id_next].fork);
+			break ;
+		}
 		ft_print(philo, "has taken a fork");
 		ft_print(philo, "is eating");
 		philo->last_meal = get_time(philo->data->time);
@@ -71,8 +85,13 @@ void	simulation(t_philo *philo)
 		ft_print(philo, "is sleeping");
 		ft_usleep(philo->data->time_sleep);
 		ft_print(philo, "is thinking");
+		pthread_mutex_lock(&philo->data->ate);
 		if (philo->data->nb_food && ++philo->food == philo->data->nb_food)
+		{
+			pthread_mutex_unlock(&philo->data->ate);
 			break ;
+		}
+		pthread_mutex_unlock(&philo->data->ate);
 	}
 }
 
@@ -84,7 +103,7 @@ void	*ft_philo(void *arg)
 	if (philo->id % 2 == 0)
 	{
 		ft_usleep(1);
-		// ft_print(philo, "is thinking");
+		ft_print(philo, "is thinking");
 	}
 	simulation(philo);
 	return (NULL);
@@ -92,30 +111,24 @@ void	*ft_philo(void *arg)
 
 int	main(int ac, char **av)
 {
-	t_data	*data;
+	t_data	data;
 	int		i;
 
 	i = 0;
 	if (ac != 5 && ac != 6)
 		ft_error("Invalid arguments");
-	data = ft_malloc(sizeof(t_data));
-	*data = ft_init(ac, av);
-	while (i < data->nb_philo)
+	ft_init(ac, av, &data);
+	while (i < data.nb_philo)
 	{
-		pthread_create(&data->philo[i].thread, NULL, ft_philo, &data->philo[i]);
-		ft_usleep(1);
+		pthread_create(&data.philo[i].thread, NULL, ft_philo, &data.philo[i]);
 		i++;
 	}
 	i = 0;
-	while (1)
+	while (i < data.nb_philo)
 	{
-		if (get_time(data->time) - data->philo[i].last_meal >= data->time_die)
-		{
-			ft_print(&data->philo[i], "died");
-			break ;
-		}
+		pthread_join(data.philo[i].thread, NULL);
+		i++;
 	}
-	free(data->philo);
-	free(data);
+	free(data.philo);
 	return (0);
 }
