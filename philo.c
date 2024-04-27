@@ -6,13 +6,42 @@
 /*   By: btvildia <btvildia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:07:16 by btvildia          #+#    #+#             */
-/*   Updated: 2024/04/26 13:48:29 by btvildia         ###   ########.fr       */
+/*   Updated: 2024/04/27 16:30:03 by btvildia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	ft_init_data_philo(t_data *data)
+void	ft_usleep(int time)
+{
+	struct timeval	start;
+	struct timeval	now;
+	int				diff;
+
+	gettimeofday(&start, NULL);
+	while (1)
+	{
+		gettimeofday(&now, NULL);
+		diff = (now.tv_sec * 1000 + now.tv_usec / 1000) - (start.tv_sec * 1000
+				+ start.tv_usec / 1000);
+		if (diff >= time)
+			break ;
+		usleep(100);
+	}
+}
+
+long	get_time(struct timeval time)
+{
+	struct timeval	now;
+	int				diff;
+
+	gettimeofday(&now, NULL);
+	diff = (now.tv_sec * 1000 + now.tv_usec / 1000) - (time.tv_sec * 1000
+			+ time.tv_usec / 1000);
+	return (diff);
+}
+
+void	ft_init_philo(t_data *data)
 {
 	int	i;
 
@@ -32,7 +61,7 @@ void	ft_init_data_philo(t_data *data)
 	}
 }
 
-void	ft_init(int ac, char **av, t_data *data)
+void	ft_init_data(int ac, char **av, t_data *data)
 {
 	if (ft_strlen(av[1]) == 0 || ft_strlen(av[2]) == 0 || ft_strlen(av[3]) == 0
 		|| ft_strlen(av[4]) == 0)
@@ -52,61 +81,7 @@ void	ft_init(int ac, char **av, t_data *data)
 	pthread_mutex_init(&data->print, NULL);
 	pthread_mutex_init(&data->ate, NULL);
 	gettimeofday(&data->time, NULL);
-	ft_init_data_philo(data);
-}
-
-void	simulation(t_philo *philo)
-{
-	while (1)
-	{
-		pthread_mutex_lock(&philo->data->print);
-		if (philo->data->dead == 1)
-		{
-			pthread_mutex_unlock(&philo->data->print);
-			break ;
-		}
-		pthread_mutex_unlock(&philo->data->print);
-		pthread_mutex_lock(&philo->fork);
-		pthread_mutex_lock(&philo->data->philo[philo->id_next].fork);
-		if (philo->data->time_die <= get_time(philo->data->time)
-			- philo->last_meal)
-		{
-			ft_print(philo, "died");
-			pthread_mutex_unlock(&philo->fork);
-			pthread_mutex_unlock(&philo->data->philo[philo->id_next].fork);
-			break ;
-		}
-		ft_print(philo, "has taken a fork");
-		ft_print(philo, "is eating");
-		philo->last_meal = get_time(philo->data->time);
-		ft_usleep(philo->data->time_eat);
-		pthread_mutex_unlock(&philo->fork);
-		pthread_mutex_unlock(&philo->data->philo[philo->id_next].fork);
-		ft_print(philo, "is sleeping");
-		ft_usleep(philo->data->time_sleep);
-		ft_print(philo, "is thinking");
-		pthread_mutex_lock(&philo->data->ate);
-		if (philo->data->nb_food && ++philo->food == philo->data->nb_food)
-		{
-			pthread_mutex_unlock(&philo->data->ate);
-			break ;
-		}
-		pthread_mutex_unlock(&philo->data->ate);
-	}
-}
-
-void	*ft_philo(void *arg)
-{
-	t_philo	*philo;
-
-	philo = (t_philo *)arg;
-	if (philo->id % 2 == 0)
-	{
-		ft_usleep(1);
-		ft_print(philo, "is thinking");
-	}
-	simulation(philo);
-	return (NULL);
+	ft_init_philo(data);
 }
 
 int	main(int ac, char **av)
@@ -117,7 +92,7 @@ int	main(int ac, char **av)
 	i = 0;
 	if (ac != 5 && ac != 6)
 		ft_error("Invalid arguments");
-	ft_init(ac, av, &data);
+	ft_init_data(ac, av, &data);
 	while (i < data.nb_philo)
 	{
 		pthread_create(&data.philo[i].thread, NULL, ft_philo, &data.philo[i]);

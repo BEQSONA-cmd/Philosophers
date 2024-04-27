@@ -6,7 +6,7 @@
 /*   By: btvildia <btvildia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:07:23 by btvildia          #+#    #+#             */
-/*   Updated: 2024/04/26 13:47:00 by btvildia         ###   ########.fr       */
+/*   Updated: 2024/04/27 15:19:13 by btvildia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,14 +45,15 @@ typedef struct s_data
 	struct timeval	time;
 }					t_data;
 
-void				*ft_philo(void *arg);
-void				ft_usleep(int time);
-long				get_time(struct timeval time);
-void				ft_print(t_philo *philo, char *str);
-void				*ft_malloc(size_t size);
 int					ft_atoi(char *str);
-void				ft_error(char *str);
 int					ft_strlen(char *s);
-void				ft_init(int ac, char **av, t_data *data);
+void				ft_usleep(int time);
+void				ft_error(char *str);
+void				*ft_philo(void *arg);
+void				*ft_malloc(size_t size);
+long				get_time(struct timeval time);
+int					ft_strcmp(char *s1, char *s2);
+void				ft_print(t_philo *philo, char *str);
+void				ft_init_data(int ac, char **av, t_data *data);
 
 #endif
