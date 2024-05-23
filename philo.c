@@ -6,7 +6,7 @@
 /*   By: btvildia <btvildia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:07:16 by btvildia          #+#    #+#             */
-/*   Updated: 2024/04/27 16:30:03 by btvildia         ###   ########.fr       */
+/*   Updated: 2024/05/23 13:04:54 by btvildia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,27 +61,30 @@ void	ft_init_philo(t_data *data)
 	}
 }
 
-void	ft_init_data(int ac, char **av, t_data *data)
+int	ft_init_data(int ac, char **av, t_data *data)
 {
 	if (ft_strlen(av[1]) == 0 || ft_strlen(av[2]) == 0 || ft_strlen(av[3]) == 0
 		|| ft_strlen(av[4]) == 0)
-		ft_error("Invalid arguments");
+		return (ft_error("Invalid arguments"));
 	data->nb_philo = ft_atoi(av[1]);
 	data->time_die = ft_atoi(av[2]);
 	data->time_eat = ft_atoi(av[3]);
 	data->time_sleep = ft_atoi(av[4]);
+	if (data->time_die < 60 || data->time_eat < 60 || data->time_sleep < 60)
+		return (ft_error("Invalid arguments"));
 	data->nb_food = 0;
 	if (ac == 6)
 		data->nb_food = ft_atoi(av[5]);
 	if (data->nb_philo < 1 || data->nb_philo > 200 || (ac == 6
 			&& data->nb_food < 1))
-		ft_error("Invalid arguments");
+		return (ft_error("Invalid arguments"));
 	data->philo = ft_malloc(sizeof(t_philo) * data->nb_philo);
 	data->dead = 0;
 	pthread_mutex_init(&data->print, NULL);
 	pthread_mutex_init(&data->ate, NULL);
 	gettimeofday(&data->time, NULL);
 	ft_init_philo(data);
+	return (0);
 }
 
 int	main(int ac, char **av)
@@ -91,8 +94,9 @@ int	main(int ac, char **av)
 
 	i = 0;
 	if (ac != 5 && ac != 6)
-		ft_error("Invalid arguments");
-	ft_init_data(ac, av, &data);
+		return (ft_error("Invalid arguments"));
+	if (ft_init_data(ac, av, &data))
+		return (1);
 	while (i < data.nb_philo)
 	{
 		pthread_create(&data.philo[i].thread, NULL, ft_philo, &data.philo[i]);

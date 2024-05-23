@@ -6,7 +6,7 @@
 /*   By: btvildia <btvildia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 21:10:54 by btvildia          #+#    #+#             */
-/*   Updated: 2024/04/27 17:21:37 by btvildia         ###   ########.fr       */
+/*   Updated: 2024/05/23 13:00:34 by btvildia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,11 @@ int	ft_strcmp(char *s1, char *s2)
 	return (s1[i] - s2[i]);
 }
 
-void	ft_error(char *str)
+int	ft_error(char *str)
 {
 	write(2, str, ft_strlen(str));
 	write(2, "\n", 1);
-	exit(1);
+	return (1);
 }
 
 int	ft_strlen(char *s)
@@ -51,7 +51,7 @@ int	ft_atoi(char *str)
 	x = 0;
 	s = 1;
 	if ((str[i] == ' ') || (str[i] >= 9 && str[i] <= 13))
-		ft_error("Error");
+		return (ft_error("Error"));
 	if ((str[i] == '-') || (str[i] == '+'))
 	{
 		if (str[i] == '-')
@@ -61,12 +61,12 @@ int	ft_atoi(char *str)
 	while (str[i])
 	{
 		if (str[i] < '0' || str[i] > '9')
-			ft_error("Error");
+			return (ft_error("Error"));
 		x = x * 10 + (str[i] - '0');
 		i++;
 	}
 	if (x > 2147483648 || (x * s) <= 0)
-		ft_error("Error");
+		return (ft_error("Error"));
 	return (x * s);
 }
 
@@ -76,6 +76,9 @@ void	*ft_malloc(size_t size)
 
 	ptr = malloc(size);
 	if (!ptr)
+	{
 		ft_error("Malloc error");
+		return (NULL);
+	}
 	return (ptr);
 }
